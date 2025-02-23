@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Word Processor - Advanced</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* Existing CSS (from previous improved version) - keep all of it */
+        body {
+            margin: 0;
+            font-family: sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+        }
+
+        .ribbon {
+            background-color: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .tab-button {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .tab-button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .tab-button.active {
+            background-color: #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .group {
+            display: inline-block;
+            vertical-align: top;
+            margin-right: 15px;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .group h3 {
+            margin: 0 0 8px;
+            font-size: 0.85em;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .group button, .group select, .group input {
+            margin: 3px;
+            padding: 6px 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+            background-color: #fff;
+            font-size: 0.9em;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .group button:hover, .group select:hover, .group input:hover {
+            background-color: #f0f0f0;
+            border-color: #b0b0b0;
+        }
+
+        .group button.active-format {
+            background-color: #e0e0e0;
+        }
+
+        .group input[type="number"] {
+            width: 40px;
+        }
+
+        .document {
+            margin: 20px;
+            padding: 20px;
+            background-color: white;
+            min-height: 500px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.08);
+            outline: none;
+            border-radius: 5px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .right-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .color-picker-label {
+            font-size: 0.9em;
+            color: #555;
+        }
+
+        .color-picker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background-color: #fff;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 2px;
+        }
+        .color-picker::-moz-color-swatch-wrapper {
+            padding: 2px;
+        }
+        .color-picker::-moz-color-swatch {
+            border: none;
+            border-radius: 2px;
+        }
+
+        .group button.list-button {
+            width: 30px;
+            text-align: center;
+        }
+
+        .group button.indent-button {
+            width: 30px;
+            text-align: center;
+        }
+
+        .group button#clearFormatting {
+            font-size: 0.8em;
+        }
+
+        /* --- NEW CSS for Advanced Features --- */
+        #view-tab-content { /* Specific ID for View Tab Content */
+            display: none;
+        }
+
+        #review-tab-content { /* Specific ID for Review Tab Content */
+            display: none;
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .zoom-controls button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+        }
+
+        #zoom-level {
+            font-size: 0.9em;
+            width: 40px;
+            text-align: center;
+            border: none;
+            background-color: transparent;
+        }
+
+        .find-replace-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .find-replace-group input {
+            padding: 6px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .find-replace-group button {
+            padding: 6px 10px;
+        }
+
+        .styles-dropdown-group {
+            position: relative; /* For dropdown positioning */
+            display: inline-block;
+        }
+
+        .styles-dropdown-button {
+            padding: 6px 10px;
+        }
+
+        .styles-dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 5px 0;
+        }
+
+        .styles-dropdown-content button {
+            display: block;
+            width: 100%;
+            padding: 8px 16px;
+            text-align: left;
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        .styles-dropdown-content button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .styles-dropdown-group:hover .styles-dropdown-content {
+            display: block;
+        }
+
+        .template-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive template grid */
+            gap: 15px;
+            padding: 10px;
+        }
+
+        .template-preview {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background-color: #fff;
+            transition: transform 0.2s;
+        }
+
+        .template-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .template-preview h4 {
+            margin-top: 0;
+            font-size: 1em;
+        }
+
+        /* Track Changes Styling */
+        .track-changes-highlight {
+            background-color: rgba(255, 200, 200, 0.5); /* Light red for deletions */
+            text-decoration: line-through;
+        }
+        .track-changes-insertion {
+            background-color: rgba(200, 255, 200, 0.5); /* Light green for insertions */
+        }
+        .comment-bubble {
+            display: inline-block;
+            background-color: #ffeb3b; /* Yellow comment bubble */
+            border-radius: 50%;
+            width: 15px;
+            height: 15px;
+            text-align: center;
+            line-height: 15px;
+            font-size: 0.8em;
+            color: #333;
+            cursor: pointer;
+            margin-left: 3px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="ribbon">
+        <div class="tabs">
+            <button class="tab-button active" data-tab="file">File</button>
+            <button class="tab-button" data-tab="home">Home</button>
+            <button class="tab-button" data-tab="insert">Insert</button>
+            <button class="tab-button" data-tab="view">View</button> <button class="tab-button" data-tab="review">Review</button>
+            <!-- More tabs can be added here -->
+        </div>
+        <div class="right-menu">
+            <div class="color-picker-group">
+                <label for="textColorPicker" class="color-picker-label">Text Color:</label>
+                <input type="color" id="textColorPicker" class="color-picker" value="#000000" onchange="changeTextColor(this.value)">
+            </div>
+            <div class="color-picker-group">
+                <label for="highlightColorPicker" class="color-picker-label">Highlight:</label>
+                <input type="color" id="highlightColorPicker" class="color-picker" value="#ffff00" onchange="changeHighlightColor(this.value)">
+            </div>
+            <!-- Add more right-side menu items as needed -->
+        </div>
+    </div>
+
+    <div class="tab-content" id="file">
+        <div class="group">
+            <h3>File Actions</h3>
+            <button onclick="newDocument()">New</button>
+            <button onclick="saveDocument()">Save</button>
+            <button onclick="openDocument()">Open</button>
+            <button onclick="exportDocument('docx')">Export as DOCX</button> <button onclick="exportDocument('pdf')">Export as PDF</button>
+        </div>
+        <div class="group">
+            <h3>Templates</h3>
+            <div class="styles-dropdown-group">
+                <button class="styles-dropdown-button">Templates <i class="fas fa-caret-down"></i></button>
+                <div class="styles-dropdown-content" id="templatesDropdown">
+                    <!-- Templates will be loaded here by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="home">
+        <div class="group">
+            <h3>Font</h3>
+            <select onchange="changeFont(this.value)">
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Verdana">Verdana</option>
+                <option value="Georgia">Georgia</option>
+            </select>
+            <input type="number" value="16" min="8" max="72" style="width: 50px;" onchange="changeFontSize(this.value)">
+            <button onclick="formatText('bold')" id="boldButton"><b>B</b></button>
+            <button onclick="formatText('italic')" id="italicButton"><i>I</i></button>
+            <button onclick="formatText('underline')" id="underlineButton"><u>U</u></button>
+            <button onclick="formatText('strikeThrough')" id="strikeButton"><strike>S</strike></button>
+            <button onclick="clearFormatting()" id="clearFormatting">Clear Format</button>
+        </div>
+        <div class="group">
+            <h3>Paragraph</h3>
+            <div class="styles-dropdown-group">
+                <button class="styles-dropdown-button">Styles <i class="fas fa-caret-down"></i></button>
+                <div class="styles-dropdown-content" id="stylesDropdown">
+                    <button onclick="applyStyle('Heading 1')">Heading 1</button>
+                    <button onclick="applyStyle('Heading 2')">Heading 2</button>
+                    <button onclick="applyStyle('Heading 3')">Heading 3</button>
+                    <button onclick="applyStyle('Normal')">Normal</button>
+                    <button onclick="applyStyle('Quote')">Quote</button>
+                    <!-- More styles can be added here -->
+                </div>
+            </div>
+            <button onclick="alignText('left')">Align Left</button>
+            <button onclick="alignText('center')">Center</button>
+            <button onclick="alignText('right')">Align Right</button>
+            <button onclick="alignText('justify')">Justify</button>
+            <button onclick="formatText('insertUnorderedList')" class="list-button"><i class="fas fa-list-ul"></i></button>
+            <button onclick="formatText('insertOrderedList')" class="list-button"><i class="fas fa-list-ol"></i></button>
+            <button onclick="formatText('indent')" class="indent-button"><i class="fas fa-indent"></i></button>
+            <button onclick="formatText('outdent')" class="indent-button"><i class="fas fa-outdent"></i></button>
+            <button onclick="setLineSpacing('1.0')">1.0x Spacing</button> <button onclick="setLineSpacing('1.5')">1.5x Spacing</button> <button onclick="setLineSpacing('2.0')">2.0x Spacing</button>
+        </div>
+        <div class="group">
+            <h3>Clipboard</h3>
+            <button onclick="formatText('cut')"><i class="fas fa-cut"></i> Cut</button>
+            <button onclick="formatText('copy')"><i class="fas fa-copy"></i> Copy</button>
+            <button onclick="formatText('paste')"><i class="fas fa-paste"></i> Paste</button>
+        </div>
+        <div class="group">
+            <h3>Editing</h3>
+            <button onclick="formatText('undo')"><i class="fas fa-undo"></i> Undo</button>
+            <button onclick="formatText('redo')"><i class="fas fa-redo"></i> Redo</button>
+            <div class="find-replace-group">
+                <input type="text" id="findText" placeholder="Find">
+                <input type="text" id="replaceText" placeholder="Replace (optional)">
+                <button onclick="findAndReplace()">Find & Replace</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="insert">
+        <div class="group">
+            <h3>Tables</h3>
+            <button onclick="insertTable()">Insert Table</button>
+        </div>
+        <div class="group">
+            <h3>Illustrations</h3>
+            <button onclick="insertImage()">Insert Image</button>
+            <button onclick="insertChart()">Insert Chart</button>
+            <button onclick="insertShape()">Insert Shape</button>
+        </div>
+        <div class="group">
+            <h3>Links & Symbols</h3>
+            <button onclick="insertLink()">Insert Link</button>
+            <button onclick="insertSymbol()">Insert Symbol</button>
+        </div>
+        <div class="group">
+            <h3>Header & Footer</h3>
+            <button onclick="insertHeader()">Header</button>
+            <button onclick="insertFooter()">Footer</button>
+            <button onclick="insertPageNumber()">Page Number</button>
+        </div>
+        <div class="group">
+            <h3>Breaks</h3>
+            <button onclick="insertHorizontalRule()">Horizontal Line</button>
+            <button onclick="insertPageBreak()">Page Break</button>
+        </div>
+    </div>
+
+    <div class="tab-content" id="view">
+        <div class="group">
+            <h3>Zoom</h3>
+            <div class="zoom-controls">
+                <button onclick="zoomIn()">+</button>
+                <input type="text" id="zoom-level" value="100%" readonly>
+                <button onclick="zoomOut()">-</button>
+            </div>
+        </div>
+        <div class="group">
+            <h3>Layout</h3>
+            <button onclick="toggleReadMode()">Read Mode</button>
+            <button onclick="toggleFullScreen()">Full Screen</button>
+        </div>
+        <!-- Add more view-related features -->
+    </div>
+
+    <div class="tab-content" id="review">
+        <div class="group">
+            <h3>Proofing</h3>
+            <button onclick="checkSpellingAndGrammar()">Spelling & Grammar</button>
+            <button onclick="openThesaurus()">Thesaurus</button>
+            <button onclick="wordCount()">Word Count</button>
+        </div>
+        <div class="group">
+            <h3>Track Changes</h3>
+            <button onclick="toggleTrackChanges()">Track Changes</button>
+            <button onclick="acceptChanges()">Accept Changes</button>
+            <button onclick="rejectChanges()">Reject Changes</button>
+        </div>
+        <div class="group">
+            <h3>Comments</h3>
+            <button onclick="insertComment()">New Comment</button>
+            <button onclick="showComments()">Show Comments</button>
+        </div>
+    </div>
+
+
+    <div class="document" contenteditable="true">Start typing here...</div>
+
+    <script>
+        // --- JavaScript from previous improved version (Keep all of it) ---
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).style.display = 'block';
+                button.classList.add('active');
+            });
+        });
+        document.getElementById('file').style.display = 'block';
+        document.querySelector('.tab-button[data-tab="file"]').classList.add('active');
+
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            updateFormatButtons();
+        }
+
+        function alignText(alignment) {
+            document.execCommand('justify' + alignment.charAt(0).toUpperCase() + alignment.slice(1), false, null);
+        }
+
+        function changeFont(fontName) {
+            document.execCommand('fontName', false, fontName);
+        }
+
+        function changeFontSize(size) {
+            document.execCommand('fontSize', false, '7');
+            const fontElements = document.querySelectorAll('font[size="7"]');
+            fontElements.forEach(el => {
+                const span = document.createElement('span');
+                span.style.fontSize = size + 'px';
+                span.innerHTML = el.innerHTML;
+                el.parentNode.replaceChild(span, el);
+            });
+        }
+
+        function changeTextColor(color) {
+            document.execCommand('foreColor', false, color);
+        }
+
+        function changeHighlightColor(color) {
+            document.execCommand('backColor', false, color);
+        }
+
+        function clearFormatting() {
+            document.execCommand('removeFormat', false, null);
+            updateFormatButtons();
+        }
+
+        function insertTable() {
+            const rows = prompt('Enter number of rows:', '2');
+            const cols = prompt('Enter number of columns:', '2');
+            if (rows && cols) {
+                let tableHtml = '<table border="1" style="border-collapse: collapse;">';
+                for (let i = 0; i < rows; i++) {
+                    tableHtml += '<tr>';
+                    for (let j = 0; j < cols; j++) {
+                        tableHtml += '<td style="padding: 5px;">Cell</td>';
+                    }
+                    tableHtml += '</tr>';
+                }
+                tableHtml += '</table>';
+                document.execCommand('insertHTML', false, tableHtml);
+            }
+        }
+
+        function insertImage() {
+            const url = prompt('Enter image URL:');
+            if (url) {
+                document.execCommand('insertImage', false, url);
+            }
+        }
+
+        function insertLink() {
+            const url = prompt('Enter URL:');
+            if (url) {
+                document.execCommand('createLink', false, url);
+            }
+        }
+
+        function insertHorizontalRule() {
+            document.execCommand('insertHorizontalRule', false, null);
+        }
+
+        function newDocument() {
+            document.querySelector('.document').innerHTML = '';
+        }
+
+        function saveDocument() {
+            const content = document.querySelector('.document').innerHTML;
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function openDocument() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'text/html';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('.document').innerHTML = e.target.result;
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function updateFormatButtons() {
+            document.querySelectorAll('.group button[onclick^="formatText"]').forEach(button => {
+                const command = button.getAttribute('onclick').match(/'([^']+)'/)[1];
+                if (command === 'bold' || command === 'italic' || command === 'underline' || command === 'strikeThrough') {
+                    if (document.queryCommandState(command)) {
+                        button.classList.add('active-format');
+                    } else {
+                        button.classList.remove('active-format');
+                    }
+                }
+            });
+        }
+        document.addEventListener('selectionchange', updateFormatButtons);
+        document.addEventListener('DOMContentLoaded', updateFormatButtons);
+
+
+        // --- NEW JavaScript for Advanced Features ---
+
+        // Styles Dropdown
+        document.addEventListener('DOMContentLoaded', () => {
+            const stylesDropdownContent = document.getElementById('stylesDropdown');
+            if (stylesDropdownContent) {
+                stylesDropdownContent.style.display = 'none'; // Initially hide styles dropdown
+            }
+        });
+
+        function applyStyle(styleName) {
+            if (styleName === 'Heading 1') {
+                applyFormatting('<h1 style="font-size: 2em; margin-bottom: 0.5em;">', '</h1>');
+            } else if (styleName === 'Heading 2') {
+                applyFormatting('<h2 style="font-size: 1.5em; margin-bottom: 0.5em;">', '</h2>');
+            } else if (styleName === 'Heading 3') {
+                applyFormatting('<h3 style="font-size: 1.17em; margin-bottom: 0.5em;">', '</h3>');
+            } else if (styleName === 'Normal') {
+                applyFormatting('<p style="font-size: 1em; line-height: 1.6;">', '</p>');
+            } else if (styleName === 'Quote') {
+                applyFormatting('<blockquote style="border-left: 3px solid #ccc; margin-left: 10px; padding-left: 10px; font-style: italic;">', '</blockquote>');
+            }
+            // Add more styles as needed
+        }
+
+        function applyFormatting(startTag, endTag) {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const range = selection.getRangeAt(0);
+            const selectedText = range.toString();
+            const formattedText = startTag + selectedText + endTag;
+
+            // Delete the selected text and insert the formatted text
+            range.deleteContents();
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = formattedText;
+            const fragment = document.createDocumentFragment();
+            while (tempDiv.firstChild) {
+                fragment.appendChild(tempDiv.firstChild);
+            }
+            range.insertNode(fragment);
+            selection.removeAllRanges(); // Clear selection
+        }
+
+
+        // Line Spacing
+        function setLineSpacing(spacing) {
+            document.querySelector('.document').style.lineHeight = spacing;
+        }
+
+        // Find and Replace
+        function findAndReplace() {
+            const findText = document.getElementById('findText').value;
+            const replaceText = document.getElementById('replaceText').value;
+            const documentElement = document.querySelector('.document');
+            const regex = new RegExp(escapeRegExp(findText), 'gi'); // 'gi' for global and case-insensitive
+            documentElement.innerHTML = documentElement.innerHTML.replace(regex, replaceText);
+        }
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // Escape special characters for RegExp
+        }
+
+
+        // Zoom Functionality
+        let currentZoom = 100;
+        const zoomStep = 10;
+        const zoomLevelDisplay = document.getElementById('zoom-level');
+
+        function zoomIn() {
+            currentZoom += zoomStep;
+            updateZoom();
+        }
+
+        function zoomOut() {
+            currentZoom -= zoomStep;
+            if (currentZoom < zoomStep) currentZoom = zoomStep; // Minimum zoom level
+            updateZoom();
+        }
+
+        function updateZoom() {
+            document.querySelector('.document').style.zoom = currentZoom / 100;
+            zoomLevelDisplay.value = currentZoom + '%';
+        }
+
+        // Read Mode and Full Screen (Basic toggles, more sophisticated read mode can be implemented)
+        let isReadMode = false;
+        function toggleReadMode() {
+            isReadMode = !isReadMode;
+            const doc = document.querySelector('.document');
+            const body = document.body;
+            if (isReadMode) {
+                doc.style.maxWidth = '800px'; // Example for read mode width
+                doc.style.margin = '50px auto';
+                body.style.backgroundColor = '#f0f0f0'; // Example read mode background
+            } else {
+                doc.style.maxWidth = 'none';
+                doc.style.margin = '20px';
+                body.style.backgroundColor = '#f4f7f9';
+            }
+        }
+
+        let isFullScreen = false;
+        function toggleFullScreen() {
+            if (!isFullScreen) {
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
+                    document.documentElement.mozRequestFullScreen();
+                } else if (document.documentElement.webkitRequestFullscreen) { /* Chrome, Safari and Opera */
+                    document.documentElement.webkitRequestFullscreen();
+                } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
+                    document.documentElement.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { /* Firefox */
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { /* Chrome, Safari and Opera */
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { /* IE/Edge */
+                    document.msExitFullscreen();
+                }
+            }
+            isFullScreen = !isFullScreen;
+        }
+
+        // Export Functionality (Placeholder - actual export needs server-side or libraries)
+        function exportDocument(format) {
+            if (format === 'docx') {
+                alert('Exporting as DOCX (feature placeholder - requires server-side or JS library like mammoth.js)');
+                // In a real application, you would use a library or server-side script to convert HTML to DOCX
+            } else if (format === 'pdf') {
+                alert('Exporting as PDF (feature placeholder - requires server-side or JS library like jsPDF)');
+                // Similarly, for PDF export, you'd need a library or server-side rendering
+            }
+        }
+
+        // Template Loading (Simple example - extend to load from JSON or server)
+        document.addEventListener('DOMContentLoaded', loadTemplates);
+
+        function loadTemplates() {
+            const templates = [
+                { name: 'Blank Document', content: 'Start typing here...' },
+                { name: 'Report Template', content: '<h1>Report Title</h1><p>Introduction...</p>' },
+                { name: 'Memo Template', content: '<h2>MEMORANDUM</h2><p>To: ...</p><p>From: ...</p>' }
+                // Add more templates
+            ];
+            const templatesDropdown = document.getElementById('templatesDropdown');
+            if (templatesDropdown) {
+                templates.forEach(template => {
+                    const templateButton = document.createElement('button');
+                    templateButton.textContent = template.name;
+                    templateButton.onclick = () => applyTemplate(template.content);
+                    templatesDropdown.appendChild(templateButton);
+                });
+            }
+        }
+
+        function applyTemplate(content) {
+            document.querySelector('.document').innerHTML = content;
+        }
+
+
+        // --- Insert Tab Functions (Placeholders - Implementation needed) ---
+        function insertChart() {
+            alert('Insert Chart (feature placeholder - requires charting library integration)');
+            // Integrate a charting library like Chart.js or similar
+        }
+
+        function insertShape() {
+            alert('Insert Shape (feature placeholder - requires SVG or canvas integration)');
+            // Implement shape drawing using SVG or canvas
+        }
+
+        function insertSymbol() {
+            const symbol = prompt('Enter symbol to insert:');
+            if (symbol) {
+                document.execCommand('insertText', false, symbol);
+            }
+        }
+
+        function insertHeader() {
+            alert('Insert Header (feature placeholder - requires header/footer structure)');
+            // Implement header/footer structure, possibly using divs outside the main document flow
+        }
+
+        function insertFooter() {
+            alert('Insert Footer (feature placeholder - requires header/footer structure)');
+            // Implement header/footer structure
+        }
+
+        function insertPageNumber() {
+            alert('Insert Page Number (feature placeholder - requires page layout and numbering logic)');
+            // Implement page numbering, likely requiring more complex page layout handling
+        }
+
+        function insertPageBreak() {
+            document.execCommand('insertParagraph'); // Simple page break simulation
+            document.execCommand('insertHorizontalRule'); // Visual break
+            document.execCommand('insertParagraph');
+            // Proper page break implementation would require more sophisticated layout management
+        }
+
+
+        // --- Review Tab Functions (Placeholders - Implementation needed) ---
+        function checkSpellingAndGrammar() {
+            alert('Spelling & Grammar Check (feature placeholder - requires spellcheck/grammar API integration)');
+            // Integrate with a spell-checking and grammar API (like LanguageTool API)
+        }
+
+        function openThesaurus() {
+            alert('Thesaurus (feature placeholder - requires thesaurus API integration)');
+            // Integrate with a thesaurus API
+        }
+
+        function wordCount() {
+            const text = document.querySelector('.document').textContent;
+            const words = text.trim().split(/\s+/).filter(word => word).length; // Basic word count
+            alert(`Word Count: ${words}`);
+        }
+
+        let trackChangesEnabled = false;
+        let changeLog = []; // To store changes for track changes
+
+        function toggleTrackChanges() {
+            trackChangesEnabled = !trackChangesEnabled;
+            alert(`Track Changes ${trackChangesEnabled ? 'Enabled' : 'Disabled'}`);
+            if (trackChangesEnabled) {
+                startTrackingChanges();
+            } else {
+                stopTrackingChanges();
+            }
+        }
+
+        function startTrackingChanges() {
+            const doc = document.querySelector('.document');
+            doc.addEventListener('input', recordChange);
+        }
+
+        function stopTrackingChanges() {
+            const doc = document.querySelector('.document');
+            doc.removeEventListener('input', recordChange);
+        }
+
+        function recordChange(event) {
+            if (!trackChangesEnabled) return;
+            const changeType = event.inputType;
+            const targetElement = event.target;
+            let changeDetails = {
+                type: changeType,
+                timestamp: new Date(),
+                content: targetElement.innerHTML // Capture current content - could be optimized
+            };
+
+            if (changeType === 'insertText') {
+                const insertedText = event.data; // Text inserted
+                if (insertedText) {
+                    const selection = window.getSelection();
+                    if (selection.rangeCount) {
+                        const range = selection.getRangeAt(0);
+                        const newNode = document.createElement('span');
+                        newNode.className = 'track-changes-insertion';
+                        newNode.textContent = insertedText;
+                        range.deleteContents(); // Remove selected content if any
+                        range.insertNode(newNode);
+                        range.collapse(false); // Collapse range at the end of insertion
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                    }
+                }
+            } else if (changeType === 'deleteContentBackward' || changeType === 'deleteContentForward') {
+                const selection = window.getSelection();
+                if (selection.rangeCount) {
+                    const range = selection.getRangeAt(0);
+                    const selectedNode = range.startContainer;
+
+                    if (selectedNode.nodeType === Node.TEXT_NODE && range.startOffset < selectedNode.textContent.length) {
+                        const deletedText = selectedNode.textContent.substring(range.startOffset, range.endOffset);
+                        const span = document.createElement('span');
+                        span.className = 'track-changes-highlight';
+                        span.textContent = deletedText;
+                        range.surroundContents(span); // Surround the deleted text with highlight
+                    }
+                    // For more complex deletions, more robust tracking is needed (diffing algorithms)
+                }
+            }
+
+
+            changeLog.push(changeDetails);
+            console.log('Change Log:', changeLog); // For debugging - review changes
+        }
+
+
+        function acceptChanges() {
+            alert('Accept Changes (feature placeholder - needs change log implementation)');
+            // Logic to iterate through changeLog and permanently apply insertions, remove deletions
+            // Could involve removing 'track-changes-insertion' class and deleting 'track-changes-highlight' content
+        }
+
+        function rejectChanges() {
+            alert('Reject Changes (feature placeholder - needs change log implementation)');
+            // Logic to revert changes based on changeLog - potentially reload original document state
+        }
+
+
+        let commentCounter = 1;
+        function insertComment() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            const selectedText = selection.toString();
+            if (!selectedText) {
+                alert('Select text to comment on.');
+                return;
+            }
+
+            const commentText = prompt('Enter your comment:');
+            if (commentText) {
+                const commentId = `comment-${commentCounter++}`;
+                const commentBubble = document.createElement('span');
+                commentBubble.className = 'comment-bubble';
+                commentBubble.textContent = commentCounter - 1; // Display comment number
+                commentBubble.title = commentText; // Comment text as tooltip
+
+                const range = selection.getRangeAt(0).cloneRange(); // Clone to avoid issues with selection manipulation
+                range.collapse(false); // Collapse range to the end of selection
+                range.insertNode(commentBubble); // Insert bubble at the end
+
+                // Optionally, you could store comments and their positions for later display/management
+                console.log(`Comment "${commentText}" added to: "${selectedText}"`);
+                selection.removeAllRanges(); // Clear selection
+            }
+        }
+
+        function showComments() {
+            alert('Show Comments (feature placeholder - needs comment management and display)');
+            // Implement a side panel or overlay to display all comments and allow navigation/interaction
+        }
+
+
+        // --- Template Gallery Loading (Placeholder - Extend with more templates & dynamic loading) ---
+        document.addEventListener('DOMContentLoaded', loadTemplateGallery);
+
+        function loadTemplateGallery() {
+            const templateGalleryDiv = document.getElementById('templatesDropdown'); // Reusing dropdown for template gallery
+            if (!templateGalleryDiv) return;
+
+            const templateData = [
+                { name: 'Blank', preview: 'blank-template.png', content: 'Start typing here...' },
+                { name: 'Report', preview: 'report-template.png', content: '<h1>Report Title</h1><p>Introduction...</p>' },
+                { name: 'Memo', preview: 'memo-template.png', content: '<h2>MEMORANDUM</h2><p>To: ...</p><p>From: ...</p>' },
+                // ... more templates with preview images and content ...
+            ];
+
+            templateGalleryDiv.innerHTML = ''; // Clear dropdown content
+
+            templateData.forEach(template => {
+                const templatePreviewDiv = document.createElement('div');
+                templatePreviewDiv.className = 'template-preview';
+                templatePreviewDiv.onclick = () => applyTemplate(template.content); // Apply template on click
+
+                const templateTitle = document.createElement('h4');
+                templateTitle.textContent = template.name;
+                templatePreviewDiv.appendChild(templateTitle);
+
+                // Placeholder for preview image (replace 'template.preview' with actual image paths)
+                const previewImage = document.createElement('div');
+                previewImage.style.width = '100%';
+                previewImage.style.height = '100px';
+                previewImage.style.backgroundColor = '#eee'; // Placeholder background
+                previewImage.style.marginBottom = '5px';
+                previewImage.textContent = 'Preview'; // Text placeholder
+                templatePreviewDiv.appendChild(previewImage);
+
+
+                templateGalleryDiv.appendChild(templatePreviewDiv);
+            });
+
+            templateGalleryDiv.style.display = 'grid'; // Display as a grid for gallery view
+            templateGalleryDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(150px, 1fr))'; // Responsive grid
+            templateGalleryDiv.style.gap = '15px';
+            templateGalleryDiv.style.padding = '10px';
+
+            // Adjust dropdown button to indicate it's now a gallery
+            const templateDropdownButton = document.querySelector('.styles-dropdown-group .styles-dropdown-button');
+            if (templateDropdownButton) {
+                templateDropdownButton.textContent = 'Templates Gallery'; // Change button text
+                templateDropdownButton.classList.remove('styles-dropdown-button'); // Remove dropdown button styling if needed
+            }
+        }
+
+
+    </script>
+</body>
+</html>
